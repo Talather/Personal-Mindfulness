@@ -9,25 +9,32 @@ import {
   Route,
   createBrowserRouter,
   RouterProvider,
+  useParams,
+
 } from "react-router-dom"
 import Quiz from "./pages/quiz/quiz"
+// import { useSearchParams } from "react-router-dom"
 
 const App = () => {
+
+  const router = createBrowserRouter([
+    { path: "/", element: <Main /> },
+    {
+      path: "/video",
+      element: <Video />,
+      loader: videoLoader,
+    },
+    {
+      path: "/quiz",
+      element: <Quiz />,
+    },
+  ])
+
+
   return <RouterProvider router={router} />
 }
 
 export default App
 
 // Router setup
-const router = createBrowserRouter([
-  { path: "/", element: <Main /> },
-  {
-    path: "/video",
-    element: <Video />,
-    loader: videoLoader,
-  },
-  {
-    path: "/quiz",
-    element: <Quiz />,
-  },
-])
+

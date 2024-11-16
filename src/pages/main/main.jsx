@@ -8,6 +8,7 @@ import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore"
 // ...
 
 export default function Main() {
+  console.log("sasta", import.meta.env.VITE_PROJECT_ID)
   return (
     <div className={styles.signIn}>
       <div className={styles.container}>

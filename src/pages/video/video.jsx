@@ -34,7 +34,7 @@ export default function Video() {
 
             <div className={styles.quizNavigation}>
               <div
-                onClick={() => navigate("/quiz")}
+                onClick={() => navigate(`/quiz?video=${videoData.id}`)}
                 style={{ cursor: "pointer" }}
               >
                 <img

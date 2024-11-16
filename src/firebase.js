@@ -8,16 +8,18 @@ import {
   writeBatch,
   query,
   where,
+  getDoc
 } from "firebase/firestore"
 
 const apiKey = import.meta.env.VITE_API_KEY
 const authDomain = import.meta.env.VITE_AUTH_DOMAIN
-const projectId = import.meta.env.VITE_PROJECTID
+const projectId = import.meta.env.VITE_PROJECT_ID
 const storageBucket = import.meta.env.VITE_STORAGE_BUCKET
 
 const messagingSenderId = import.meta.env.VITE_MESSAGE_SENDER_ID
 const appId = import.meta.env.VITE_APP_ID
 const dbUrl = import.meta.env.VITE_DATABASE_URL
+
 
 // Replace these placeholders with your actual Firebase project configuration
 const firebaseConfig = {
@@ -82,7 +84,8 @@ async function getVideo(grade) {
     const querySnapshot = await query(
       videoCollectionRef,
       where("grade", "==", grade)
-    )
+    ) 
+    console.log("zalim",grade,querySnapshot)
 
     // // Extract user data with IDs and format it
     if (querySnapshot) {
@@ -101,42 +104,168 @@ async function getVideo(grade) {
   }
 }
 
-async function getQuiz() {
+async function getQuiz(video) {
   try {
+    console.log("harami-params",video)
     const db = getFirestore()
     // Create a reference to the "users" collection
     const quizCollectionRef = collection(db, "quiz")
     const questionCollectionRef = collection(db, "question")
     const answerCollectionRef = collection(db, "answer")
+    const videoCollectionRef = collection(db, "video")
+    const videoDoc=doc(videoCollectionRef,video)
 
+
+    const quizQuery= await query(
+      quizCollectionRef,
+      where("video", "==",videoDoc))
+    
+
+    const queryquizSnapshot = await getDocs(quizQuery)
+    const  quizes= queryquizSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
+
+    
+    
     // Fetch all documents from the "users" collection
-    const quizSnapshot = await getDocs(quizCollectionRef)
-    const questionSnapshot = await getDocs(questionCollectionRef)
-    const answerSnapshot = await getDocs(answerCollectionRef)
+    // const quizSnapshot = await getDocs(quizCollectionRef)
+   
+
+
+
+    // const questionSnapshot = await getDocs(questionCollectionRef)
+    // const answerSnapshot = await getDocs(answerCollectionRef)
+
+
+
+
 
     // // Extract user data with IDs and format it
-    const quizes = quizSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
+    // const quizes = quizSnapshot.docs.map((doc) => ({
+    //   id: doc.id,
+    //   ...doc.data(),
+    // }))
+    //  const videoSnap = await getDoc(quizes[0].video)
+    //  console.log("maaalia ", videoSnap.data())
 
-    const questions = questionSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
 
-    const answers = answerSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
 
-    console.log("users:", quizes) // Log retrieved user data
-    console.log("question:", questions)
-    console.log("answer:", answers)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+console.log("pak vs australia:", quizes)
+
+
+     const questionQuery = await query(
+       questionCollectionRef,
+       where("quiz", "==", doc(quizCollectionRef,quizes[0].id))
+     )
+
+     const questionSnapshot = await getDocs(questionQuery)
+     const questions = questionSnapshot.docs.map((doc) => ({
+       id: doc.id,
+       ...doc.data(),
+     }))
+
+     console.log("pak vs questions:", questions[0].id)
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    for (let i = 0; i < questions.length; i++) {
+      const answerQuery = await query(
+        answerCollectionRef,
+        where("question", "==", doc(questionCollectionRef, questions[i].id))
+      )
+
+      const answerSnapshot = await getDocs(answerQuery)
+      const answers = answerSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      questions[i].answers = answers;
+      questions[i][answers] = answers;
+      console.log("pak vs answers:", answers)
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+    // console.log("users:", quizes) // Log retrieved user data
+    // console.log("question:", questions)
+    quizes[0].questions=questions
+    // // console.log("answer:", answers)
+    return {quiz:quizes}
   } catch (error) {
     console.error("Error fetching users:", error)
   }
 }
+
+
+
+
+
+
+
+
+
 
 async function createSubmittedQuiz(submittedQuizCreate) {
   try {

@@ -8,7 +8,7 @@ import {
   writeBatch,
   query,
   where,
-  getDoc
+  // getDoc
 } from "firebase/firestore"
 
 const apiKey = import.meta.env.VITE_API_KEY
@@ -41,6 +41,18 @@ initializeApp(firebaseConfig)
 
 async function getUser() {
   try {
+    const firebaseConfig = {
+      apiKey: apiKey,
+      authDomain: authDomain,
+      projectId: projectId,
+      storageBucket: storageBucket,
+      messagingSenderId: messagingSenderId,
+      appId: appId,
+      databaseURL: dbUrl,
+    }
+
+    // Initialize Firebase App
+    initializeApp(firebaseConfig)
     const db = getFirestore()
 
     const usersCollectionRef = collection(db, "users")
@@ -60,6 +72,18 @@ async function getUser() {
 
 async function createUser(userCreate) {
   try {
+    const firebaseConfig = {
+      apiKey: apiKey,
+      authDomain: authDomain,
+      projectId: projectId,
+      storageBucket: storageBucket,
+      messagingSenderId: messagingSenderId,
+      appId: appId,
+      databaseURL: dbUrl,
+    }
+
+    // Initialize Firebase App
+    initializeApp(firebaseConfig)
     const db = getFirestore()
     const usersCollectionRef = collection(db, "users")
     const querySnapshot = await addDoc(usersCollectionRef, userCreate)
@@ -75,6 +99,18 @@ async function createUser(userCreate) {
 
 async function getVideo(grade) {
   try {
+    const firebaseConfig = {
+      apiKey: apiKey,
+      authDomain: authDomain,
+      projectId: projectId,
+      storageBucket: storageBucket,
+      messagingSenderId: messagingSenderId,
+      appId: appId,
+      databaseURL: dbUrl,
+    }
+
+    // Initialize Firebase App
+    initializeApp(firebaseConfig)
     const db = getFirestore()
     // Create a reference to the "users" collection
     const videoCollectionRef = collection(db, "video")
@@ -85,9 +121,7 @@ async function getVideo(grade) {
       videoCollectionRef,
       where("grade", "==", grade)
     ) 
-    console.log("zalim",grade,querySnapshot)
-
-    // // Extract user data with IDs and format it
+    
     if (querySnapshot) {
       const v = await getDocs(querySnapshot)
       const videos = v.docs.map((doc) => ({
@@ -106,7 +140,18 @@ async function getVideo(grade) {
 
 async function getQuiz(video) {
   try {
-    console.log("harami-params",video)
+    const firebaseConfig = {
+      apiKey: apiKey,
+      authDomain: authDomain,
+      projectId: projectId,
+      storageBucket: storageBucket,
+      messagingSenderId: messagingSenderId,
+      appId: appId,
+      databaseURL: dbUrl,
+    }
+
+    // Initialize Firebase App
+    initializeApp(firebaseConfig)
     const db = getFirestore()
     // Create a reference to the "users" collection
     const quizCollectionRef = collection(db, "quiz")
@@ -128,27 +173,17 @@ async function getQuiz(video) {
     }))
 
     
-    
-    // Fetch all documents from the "users" collection
-    // const quizSnapshot = await getDocs(quizCollectionRef)
+  
    
 
 
 
-    // const questionSnapshot = await getDocs(questionCollectionRef)
-    // const answerSnapshot = await getDocs(answerCollectionRef)
+    
 
 
 
 
-
-    // // Extract user data with IDs and format it
-    // const quizes = quizSnapshot.docs.map((doc) => ({
-    //   id: doc.id,
-    //   ...doc.data(),
-    // }))
-    //  const videoSnap = await getDoc(quizes[0].video)
-    //  console.log("maaalia ", videoSnap.data())
+    
 
 
 
@@ -160,19 +195,6 @@ async function getQuiz(video) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-console.log("pak vs australia:", quizes)
 
 
      const questionQuery = await query(
@@ -186,7 +208,6 @@ console.log("pak vs australia:", quizes)
        ...doc.data(),
      }))
 
-     console.log("pak vs questions:", questions[0].id)
 
 
 
@@ -238,20 +259,7 @@ console.log("pak vs australia:", quizes)
 
 
 
-
-
-
-
-
-
-
-
-
-   
-    // console.log("users:", quizes) // Log retrieved user data
-    // console.log("question:", questions)
     quizes[0].questions=questions
-    // // console.log("answer:", answers)
     return {quiz:quizes}
   } catch (error) {
     console.error("Error fetching users:", error)

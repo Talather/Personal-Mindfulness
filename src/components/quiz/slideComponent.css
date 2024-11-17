@@ -111,3 +111,58 @@
   opacity: 0; /* Fade out */
   transition: transform 300ms ease-in-out, opacity 300ms ease-in-out;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.spinner {
+  border: 7px solid rgba(0, 0, 0, 0.1);
+  border-top: 5px solid #006738;
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  animation: spin 1s linear infinite;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  margin: auto;
+  margin-top: 30vh;
+  margin-bottom: 30vh;
+  
+  display: flex;
+  justify-items: center;
+  /* background-color: aqua; */
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+

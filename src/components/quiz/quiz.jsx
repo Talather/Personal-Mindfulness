@@ -35,20 +35,23 @@ export default function QuizComponent() {
   const [state, setState] = useState({})
   const [questions, setQuestions] = useState([])
   const [searchParams, setSearchParams] = useSearchParams()
+  const [loading, setLoading] = useState(false)
+  const [selectedAnswers, setSelectedAnswers] = useState(0)
   const video = searchParams.get("video")
-  console.log("siskta", video)
+
 
   // Fetch quiz data
   useEffect(() => {
-      console.log("klay thompson")
+    
       
     const fetchData = async () => {
       // try {
-        console.log("steph curry")
-
+      
+           setLoading(true)
           const response = await getQuiz(video)
-          console.log("Quiz response:", response.quiz[0].questions)
-          setQuestions(response.quiz[0].questions)
+          
+      setQuestions(response.quiz[0].questions)
+      setLoading(false)
 
       // } catch (error) {
 
@@ -58,15 +61,6 @@ export default function QuizComponent() {
     fetchData()
   }, [])
 
-
-
-
-
-    
-    // console.log("miamiHeats",questions)
-    // const questions = questions
-        // question
-    // console.log("zalalat",questions)
     
   //   [
   //   {
@@ -108,6 +102,7 @@ export default function QuizComponent() {
   const [correctAnswerScore, setCorrectAnswerScore] = useState(0)
 
   const handleNext = () => {
+   console.log("harami", getValues())
     if (currentIndex < questions.length - 1) setCurrentIndex(currentIndex + 1)
   }
 
@@ -132,11 +127,17 @@ export default function QuizComponent() {
     return correctAnswers
   }
 
+
+
+
+
+
   const onSubmit = async (formData) => {
     const correctAnswerScore = evaluateQuiz(formData)
-
+    
     setCorrectAnswerScore(correctAnswerScore)
     setState({})
+    setCompleted(true)
 
     // const response = await createCompletedSurvey({}, formData)
     setState({ success: true })
@@ -156,20 +157,22 @@ export default function QuizComponent() {
 
 
   const updateProgress = () => {
-    // const values = Object.values(getValues())
-    // const completedAnswers = values.filter((v) => v)
-    // setProgress((completedAnswers.length / questions.length) * 100)
+    const values = Object.values(getValues())
+
+    const completedAnswers = values.filter((v) => v)
+    setSelectedAnswers(completedAnswers.length)
+    setProgress((completedAnswers.length / questions.length) * 100)
   }
 
   useEffect(() => {
     updateProgress()
   }, [currentIndex])
 
-  useEffect(() => {
-    if (state.success) {
-      setCompleted(true)
-    }
-  }, [state])
+  // useEffect(() => {
+  //   if (state.success) {
+  //     setCompleted(true)
+  //   }
+  // }, [state])
 
   return (
     <AnimatePresence>
@@ -258,18 +261,34 @@ export default function QuizComponent() {
                   >
                     Previous
                   </Button>
-                  <Button
-                    color="primary"
-                    className="w-full"
-                    isLoading={isSubmitting}
-                    // isDisabled={currentIndex === questions.length - 1}
-                    type={currentIndex === questions.length - 1 ? "Submit" : ""}
-                    onClick={() => {
-                      handleNext()
-                    }}
-                  >
-                    {currentIndex === questions.length - 1 ? "Submit" : "Next"}
-                  </Button>
+                  {currentIndex === questions.length - 1 &&
+                  selectedAnswers === questions.length ? (
+                    <Button
+                      color="primary"
+                      className="w-full"
+                      isLoading={isSubmitting}
+                      // isDisabled={currentIndex === questions.length - 1}
+                      type={"Submit"}
+                      // onClick={() => {
+                      //   handleNext()
+                      // }}
+                    >
+                      Submit
+                    </Button>
+                  ) : (
+                    <Button
+                      color="primary"
+                      className="w-full"
+                      // isLoading={isSubmitting}
+                      // isDisabled={currentIndex === questions.length - 1}
+                    
+                      onClick={() => {
+                        handleNext()
+                      }}
+                    >
+                      Next
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -316,7 +335,7 @@ export default function QuizComponent() {
           {/* <h1 className={styles.completedFooter}>Your INSPIRE® Team</h1> */}
         </div>
       )}
-    
+      {loading ? <div className="spinner"></div> : null}
     </AnimatePresence>
   )
 }

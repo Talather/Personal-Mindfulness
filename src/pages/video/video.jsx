@@ -2,10 +2,12 @@ import styles from "./video.module.css"
 import ReactPlayer from "react-player"
 import { motion } from "framer-motion"
 import { useNavigate, useLoaderData } from "react-router-dom"
-
+import { useSearchParams } from "react-router-dom"
 export default function Video() {
   const navigate = useNavigate()
   const videoData = useLoaderData()
+  const [searchParams, setSearchParams] = useSearchParams()
+   const user = searchParams.get("user")
 
   return (
     <motion.div
@@ -34,7 +36,9 @@ export default function Video() {
 
             <div className={styles.quizNavigation}>
               <div
-                onClick={() => navigate(`/quiz?video=${videoData.id}`)}
+                onClick={() =>
+                  navigate(`/quiz?video=${videoData.id}&user=${user}`)
+                }
                 style={{ cursor: "pointer" }}
               >
                 <img

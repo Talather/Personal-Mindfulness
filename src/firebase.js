@@ -241,6 +241,9 @@ async function getQuiz(video) {
         id: doc.id,
         ...doc.data(),
       }))
+      answers.forEach((answer) => {
+        answer.correct===true ? questions[i].correctAnswer=answer.id : null
+      })
       questions[i].answers = answers;
       questions[i][answers] = answers;
       console.log("pak vs answers:", answers)
@@ -277,12 +280,32 @@ async function getQuiz(video) {
 
 async function createSubmittedQuiz(submittedQuizCreate) {
   try {
+    const quiz = submittedQuizCreate.quiz
+    const user = submittedQuizCreate.user
+    
+    const firebaseConfig = {
+      apiKey: apiKey,
+      authDomain: authDomain,
+      projectId: projectId,
+      storageBucket: storageBucket,
+      messagingSenderId: messagingSenderId,
+      appId: appId,
+      databaseURL: dbUrl,
+    }
+
+    // Initialize Firebase App
+    initializeApp(firebaseConfig)
     const db = getFirestore()
     // Create a reference to the "users" collection
-    const usersCollectionRef = collection(db, "submittedQuiz")
+    const submittedQuizCollectionRef = collection(db, "submittedQuiz")
+    const quizCollectionRef = collection(db, "quiz")
+    const usersCollectionRef = collection(db, "users")
+    submittedQuizCreate.quiz = doc(quizCollectionRef,quiz)
+    submittedQuizCreate.user = doc(usersCollectionRef,user)
+    
 
     // Fetch all documents from the "users" collection
-    const submittedQuiz = await addDoc(usersCollectionRef, submittedQuizCreate)
+    const submittedQuiz = await addDoc(submittedQuizCollectionRef, submittedQuizCreate)
 
     // // Extract user data with IDs and format it
     // const submi = querySnapshot.docs.map((doc) => ({
@@ -299,19 +322,57 @@ async function createSubmittedQuiz(submittedQuizCreate) {
 
 async function createResponses(responseCreates) {
   try {
+    console.log("sunny leone",responseCreates)
+    const firebaseConfig = {
+      apiKey: apiKey,
+      authDomain: authDomain,
+      projectId: projectId,
+      storageBucket: storageBucket,
+      messagingSenderId: messagingSenderId,
+      appId: appId,
+      databaseURL: dbUrl,
+    }
+
+    // Initialize Firebase App
+    initializeApp(firebaseConfig)
     const db = getFirestore()
     // Create a reference to the "users" collection
     const batch = writeBatch(db)
 
-    responseCreates.forEach((item) => {
-      const docRef = doc(db, "responses", item.id) // Specify the collection and document ID
-      batch.set(docRef, item) // Set the document data
-    })
 
-    // Fetch all documents from the "users" collection
+
+
+
+    const answerCollectionRef = collection(db, "answer")
+    const quizCollectionRef = collection(db, "quiz")
+    const usersCollectionRef = collection(db, "users")
+
+    
+    
+
+
+
+
+
+
+
+    responseCreates.forEach((item, index) => {
+      console.log("kisa sins",index)
+
+      item.quiz = doc(quizCollectionRef, item.quiz)
+      item.answer = doc(answerCollectionRef, item.answer)
+      item.user = doc(usersCollectionRef, item.user)
+      console.log("ava adams",item)
+      const responseCollectionRef = collection(db,"responses")
+      console.log("ja mac",responseCollectionRef)
+      batch.set(doc(responseCollectionRef), item) 
+    })
+    console.log("mia khalifa",batch)
+
+    
     const responses = await batch.commit()
 
-    console.log("users:", responses) // Log retrieved user data
+    return responses// Log retrieved user data
   } catch (error) {
     console.error("Error fetching users:", error)
   }

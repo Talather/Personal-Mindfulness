@@ -24,14 +24,14 @@ export default function SignInFormComponent() {
       schoolName: formData.SchoolName,
       role: "student",
     }
-    const response = await createUser({ userCreate })
+    const user = await createUser({ userCreate })
 
-    if (!response) {
+    if (!user) {
       setState({ success: true })
     } else {
-      setState(response)
+      setState(user)
     }
-    navigate(`/video?grade=${formData.grade}`)
+    navigate(`/video?grade=${formData.grade}&user=${user.id}`)
   }
 
   return (

@@ -1,5 +1,3 @@
-
-
 import { Button, Progress, Radio, RadioGroup } from "@nextui-org/react"
 import { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
@@ -7,17 +5,8 @@ import styles from "./quiz.module.css"
 import { CSSTransition, TransitionGroup } from "react-transition-group"
 import "./slideComponent.css"
 import { AnimatePresence } from "framer-motion"
-import { getQuiz } from "../../firebase"
+import { createResponses, createSubmittedQuiz, getQuiz } from "../../firebase"
 import { useSearchParams } from "react-router-dom"
-
-
-
-
-
-
-
-
-
 
 export default function QuizComponent() {
   const [completed, setCompleted] = useState(false)
@@ -33,24 +22,24 @@ export default function QuizComponent() {
 
   const [progress, setProgress] = useState(0)
   const [state, setState] = useState({})
+  const [quiz, setQuiz] = useState()
   const [questions, setQuestions] = useState([])
   const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [selectedAnswers, setSelectedAnswers] = useState(0)
   const video = searchParams.get("video")
-
+  const user = searchParams.get("user")
 
   // Fetch quiz data
   useEffect(() => {
-    
-      
     const fetchData = async () => {
       // try {
-      
-           setLoading(true)
-          const response = await getQuiz(video)
-          
+
+      setLoading(true)
+      const response = await getQuiz(video)
+
       setQuestions(response.quiz[0].questions)
+      setQuiz(response.quiz[0].id)
       setLoading(false)
 
       // } catch (error) {
@@ -61,7 +50,6 @@ export default function QuizComponent() {
     fetchData()
   }, [])
 
-    
   //   [
   //   {
   //     id: 1,
@@ -102,7 +90,7 @@ export default function QuizComponent() {
   const [correctAnswerScore, setCorrectAnswerScore] = useState(0)
 
   const handleNext = () => {
-   console.log("harami", getValues())
+   
     if (currentIndex < questions.length - 1) setCurrentIndex(currentIndex + 1)
   }
 
@@ -114,27 +102,29 @@ export default function QuizComponent() {
   //   setCurrentIndex((currentIndex + 1) % questions.length)
   // }
 
-  function evaluateQuiz(formData) {
+  async function evaluateQuiz(formData) {
+    console.log("zalalat",questions[0])
     let correctAnswers = 0
-
+    const responseCreates = []
     const k = Object.keys(formData)
 
     for (const key in k) {
-      if (formData[k[key]] === questions[key].correctAnswerId) {
+      if (formData[k[key]] === questions[key].correctAnswer) {
         correctAnswers = correctAnswers + 1
       }
+      responseCreates.push({ answer: formData[k[key]], user: user, quiz: quiz })
     }
+     await createSubmittedQuiz({ quiz: quiz, user: user })
+    
+
+   await createResponses(responseCreates)
+    
     return correctAnswers
   }
 
-
-
-
-
-
   const onSubmit = async (formData) => {
-    const correctAnswerScore = evaluateQuiz(formData)
-    
+    const correctAnswerScore = await evaluateQuiz(formData)
+
     setCorrectAnswerScore(correctAnswerScore)
     setState({})
     setCompleted(true)
@@ -142,19 +132,6 @@ export default function QuizComponent() {
     // const response = await createCompletedSurvey({}, formData)
     setState({ success: true })
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   const updateProgress = () => {
     const values = Object.values(getValues())
@@ -173,6 +150,48 @@ export default function QuizComponent() {
   //     setCompleted(true)
   //   }
   // }, [state])
+
+
+
+
+
+
+
+  const handleKeyPress = (event) => {
+    
+    
+    if (event.key === "Enter")
+    {
+      console.log("bihari vajpai")
+      event.preventDefault()
+      handleNext() // Trigger next question on Enter
+    }
+  }
+
+  
+  useEffect(() => {
+    // Add the event listener
+    
+    window.addEventListener("keydown", handleKeyPress)
+ 
+    // Cleanup function: remove the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress)
+    }
+  }, [handleKeyPress])
+
+
+
+
+  const removeFocus = () => {
+    // Get the currently focused element
+    const activeElement = document.activeElement
+
+    // Check if it's a radio button and remove focus
+    if (activeElement && activeElement.type === "radio") {
+      activeElement.blur() // Remove focus from the radio button
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -223,9 +242,11 @@ export default function QuizComponent() {
                                 //   `answer${questions[currentIndex].id}`,
                                 //   val
                                 // )
-                                updateProgress()
+                                updateProgress();
+                                removeFocus();
                               }}
                               value={value}
+                              
                             >
                               {questions[currentIndex].answers.map((answer) => (
                                 <Radio
@@ -233,6 +254,7 @@ export default function QuizComponent() {
                                     currentIndex + 1 === questions.length
                                       ? setProgress(100)
                                       : null
+                                    
                                   }}
                                   key={answer.id}
                                   value={answer.id}
@@ -253,7 +275,7 @@ export default function QuizComponent() {
                   <Button
                     color="primary"
                     className="w-full"
-                    isLoading={isSubmitting}
+                    // isLoading={isSubmitting}
                     // type="submit"
                     onClick={() => {
                       handlePrevious()
@@ -281,7 +303,7 @@ export default function QuizComponent() {
                       className="w-full"
                       // isLoading={isSubmitting}
                       // isDisabled={currentIndex === questions.length - 1}
-                    
+                      
                       onClick={() => {
                         handleNext()
                       }}
